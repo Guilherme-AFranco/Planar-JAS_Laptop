@@ -244,10 +244,10 @@ elif page == "⚙️ Gerador de matriz de calibração":
 
     if st.button("Analise de matriz"):
         # Dados para os gráficos
-        Rx_labels = [i for i in range(0, 13)]  # Nomes dos Rx (colunas)
-        values_calib = [12] * 13  # Valores arbitrários
+        Tx_labels = [f'{i:02}' for i in range(1, 14)]  # Gera uma lista de '01' a '13'
+        values_calib = [16] * 13  # Valores arbitrários
 
-        st.session_state.Rx_labels = Rx_labels
+        st.session_state.Tx_labels = Tx_labels
         st.session_state.values_calib = values_calib
 
         filtered_matriz_calib = df[df['Tables_in_base_de_dados'].str.startswith(matriz_file_box)]['Tables_in_base_de_dados'].tolist() # Obtendo todos os arquivos da espessura selecionada
@@ -272,9 +272,9 @@ elif page == "⚙️ Gerador de matriz de calibração":
             # st.write(colors)
             
         fig = px.bar(
-            x=st.session_state.Rx_labels, 
-            y=st.session_state.values_calib, 
-            labels={'x': '', 'y': 'Tx'}, 
+            y=st.session_state.Tx_labels, 
+            x=st.session_state.values_calib, 
+            labels={'x': 'Rx', 'y': 'Tx'}, 
             title="Características da malha",
             # color_discrete_sequence=colors  # Aplicando as cores
         )
@@ -283,7 +283,7 @@ elif page == "⚙️ Gerador de matriz de calibração":
         # fig = px.bar(x=st.session_state.Rx_labels, y=st.session_state.values_calib, labels={'x': '', 'y': 'Tx'}, title="Características da malha")
         
         # Remover os números no eixo x
-        fig.update_xaxes(showticklabels=False)
+        # fig.update_xaxes(showticklabels=False)
 
         # Alterar manualmente as cores das barras
         for i, bar in enumerate(fig.data[0].x):
@@ -294,16 +294,61 @@ elif page == "⚙️ Gerador de matriz de calibração":
         # Colunas para os botões Rx (depois exibir os botões abaixo do gráfico)
         cols = st.columns(14)
 
-        # Simulação de clique nos botões
-        for i in range(13):
-            with cols[i+1]:
-                if st.button(f"Rx{i}"):
-                    st.session_state.selected_column = i  # Armazenar a coluna selecionada
-                    try:
-                        st.session_state.calib_fig, st.session_state.calib_coefs = plot_matriz_calib_calib(st.session_state.matriz_cali, i, matriz_file_box)
-                    except:
-                        st.write("Erro na criação dos gráficos.")
-                    st.experimental_rerun()
+        # st.markdown("""
+        #     <style>
+        #     .custom-button > button {
+        #         padding: 5px 10px;  /* Ajuste do tamanho do botão */
+        #         font-size: 12px;    /* Tamanho da fonte */
+        #     }
+        #     </style>
+        # """, unsafe_allow_html=True)
+
+        cols = st.columns(5)
+
+        with cols[0]:
+            Tx_option = st.selectbox("Selecione um Tx:", st.session_state.Tx_labels)
+            selected_index = st.session_state.Tx_labels.index(Tx_option)
+
+            # Quando uma opção é selecionada
+            if st.button(f"Gerar curva"):
+                st.session_state.selected_column = selected_index  # Armazenar a coluna selecionada
+                try:
+                    st.session_state.calib_fig, st.session_state.calib_coefs = plot_matriz_calib_calib(st.session_state.matriz_cali, selected_index, matriz_file_box)
+                except Exception as e:
+                    st.write("Erro na criação dos gráficos:", e)
+                st.experimental_rerun()
+
+        # # Adicionar botões em 16 linhas
+        # for i in range(13):
+        #     if i<9:
+        #         # if st.button(f"Rx0{i+1}", key=f"button_0{i+1}", help=f"Selecionar Rx0{i+1}", css_class="custom-button"):  # Ajustar o índice para Rx1, Rx2, ..., Rx16
+        #         if st.button(f"Rx0{i+1}", key=f"button_0{i+1}"):  # Ajustar o índice para Rx1, Rx2, ..., Rx16
+        #             st.session_state.selected_column = i  # Armazenar a coluna selecionada
+        #             try:
+        #                 st.session_state.calib_fig, st.session_state.calib_coefs = plot_matriz_calib_calib(st.session_state.matriz_cali, i, matriz_file_box)
+        #             except:
+        #                 st.write("Erro na criação dos gráficos.")
+        #             st.experimental_rerun()
+        #     else:
+        #         # if st.button(f"Rx{i+1}", key=f"button_{i+1}", help=f"Selecionar Rx{i+1}", css_class="custom-button"):  # Ajustar o índice para Rx1, Rx2, ..., Rx16
+        #         if st.button(f"Rx{i+1}", key=f"button_{i+1}"):  # Ajustar o índice para Rx1, Rx2, ..., Rx16
+        #             st.session_state.selected_column = i  # Armazenar a coluna selecionada
+        #             try:
+        #                 st.session_state.calib_fig, st.session_state.calib_coefs = plot_matriz_calib_calib(st.session_state.matriz_cali, i, matriz_file_box)
+        #             except:
+        #                 st.write("Erro na criação dos gráficos.")
+        #             st.experimental_rerun()
+
+        # # Simulação de clique nos botões
+        # for i in range(13):
+        #     with cols[i+1]:
+        #         if st.button(f"Rx{i}"):
+        #             st.session_state.selected_column = i  # Armazenar a coluna selecionada
+        #             try:
+        #                 st.session_state.calib_fig, st.session_state.calib_coefs = plot_matriz_calib_calib(st.session_state.matriz_cali, i, matriz_file_box)
+        #             except:
+        #                 st.write("Erro na criação dos gráficos.")
+        #             st.experimental_rerun()
 
         cols = st.columns(2)
         with cols[0]:

@@ -36,13 +36,21 @@ $checkbox2.AutoSize = $true  # Ajusta o tamanho automaticamente
 $checkbox2.Location = New-Object System.Drawing.Point(30, 100)
 $form.Controls.Add($checkbox2)
 
+# Cria uma caixa de seleção para o container 3
+$checkbox3 = New-Object System.Windows.Forms.CheckBox
+$checkbox3.Text = "Laptop JAS (824)"
+$checkbox3.Font = New-Object System.Drawing.Font("Arial", 10)
+$checkbox3.AutoSize = $true  # Ajusta o tamanho automaticamente
+$checkbox3.Location = New-Object System.Drawing.Point(30, 130)
+$form.Controls.Add($checkbox3)
+
 # Cria um botão para confirmar a seleção
 $buttonStart = New-Object System.Windows.Forms.Button
 $buttonStart.Text = "Iniciar"
 $buttonStart.Font = New-Object System.Drawing.Font("Arial", 10, [System.Drawing.FontStyle]::Bold)
 $buttonStart.Width = 100
 $buttonStart.Height = 30
-$buttonStart.Location = New-Object System.Drawing.Point(50, 150)
+$buttonStart.Location = New-Object System.Drawing.Point(50, 180)
 $buttonStart.BackColor = [System.Drawing.Color]::LightBlue
 $form.Controls.Add($buttonStart)
 
@@ -52,7 +60,7 @@ $buttonExit.Text = "Sair"
 $buttonExit.Font = New-Object System.Drawing.Font("Arial", 10, [System.Drawing.FontStyle]::Bold)
 $buttonExit.Width = 100
 $buttonExit.Height = 30
-$buttonExit.Location = New-Object System.Drawing.Point(200, 150)
+$buttonExit.Location = New-Object System.Drawing.Point(200, 180)
 $buttonExit.BackColor = [System.Drawing.Color]::LightCoral
 $form.Controls.Add($buttonExit)
 
@@ -85,6 +93,14 @@ $buttonStart.Add_Click({
         } elseif ($status -eq "exited" -or $status -eq "created") {
             Start-Process "docker" -ArgumentList "start 4fg849564j8s"
         }
+    }
+    elseif ($checkbox3.Checked) {
+        $status = Get-ContainerStatus "824fd50927ad"
+        if ($status -eq "paused") {
+            Start-Process "docker" -ArgumentList "unpause 824fd50927ad"
+        } elseif ($status -eq "exited" -or $status -eq "created") {
+            Start-Process "docker" -ArgumentList "start 824fd50927ad"
+        }
     } else {
         [System.Windows.Forms.MessageBox]::Show("Por favor, selecione um container.")
         return
@@ -92,8 +108,8 @@ $buttonStart.Add_Click({
 
     # Ativa o ambiente virtual e roda o Streamlit em segundo plano
     # Ativa o ambiente virtual
-        Set-Location -Path "E:\TCC\1sem-2024\Estudo_Streamlit"  # Altere para o caminho correto da sua pasta
-        .\venv_Steamlit\Scripts\Activate
+        Set-Location -Path "C:\Guilherme\Streamlit-Planar"  # Altere para o caminho correto da sua pasta
+        .\venv\Scripts\Activate
 
         # Roda o Streamlit
         streamlit run Planar-v4.py
@@ -111,6 +127,9 @@ $buttonExit.Add_Click({
     }
     elseif ($checkbox2.Checked) {
         Start-Process "docker" -ArgumentList "pause 4fg849564j8s"
+    }
+    elseif ($checkbox3.Checked) {
+        Start-Process "docker" -ArgumentList "pause 824fd50927ad"
     }
 
     # Fecha o formulário
